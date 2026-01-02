@@ -1,107 +1,127 @@
-const catImages = [
-  "cat-images/cat1.jpg",
-  "cat-images/cat2.jpg",
-  "cat-images/cat3.jpg",
-  "cat-images/cat4.jpg",
-  "cat-images/cat5.jpg",
-  "cat-images/cat6.jpg",
-  "cat-images/cat7.jpg",
-  "cat-images/catGif.gif"
+// Array of cat images (local folder)
+const cats = [
+    'cat-images/cat1.jpg',
+    'cat-images/cat2.jpg',
+    'cat-images/cat3.jpg',
+    'cat-images/cat4.jpg',
+    'cat-images/cat5.jpg',
+    'cat-images/cat6.jpg',
+    'cat-images/cat7.jpg',
+    'cat-images/catGif.gif'
 ];
 
-let currentIndex = 0;
-let likedCats = [];
+let currentIndex = 0;          // Track current cat index
+let likedCats = [];            // Store liked cats
 
-const card = document.getElementById("card");
-const catImage = document.getElementById("catImage");
-const likeBtn = document.getElementById("likeBtn");
-const dislikeBtn = document.getElementById("dislikeBtn");
+const cardContainer = document.getElementById('card-container');
+const summary = document.getElementById('summary');
+const likedCount = document.getElementById('liked-count');
+const likedCatsContainer = document.getElementById('liked-cats');
 
-let startX = 0;
-let currentX = 0;
+// Initialize the first card
+function createCard(index) {
+    if(index >= cats.length) {
+        showSummary();
+        return;
+    }
 
-// Load first image
-loadCat();
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.style.backgroundImage = `url(${cats[index]})`;
+    cardContainer.appendChild(card);
 
-function loadCat() {
-  catImage.src = catImages[currentIndex];
-  card.style.transform = "translateX(0)";
+    // Drag/swipe variables
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+
+    // Mouse/touch events for swipe
+    card.addEventListener('mousedown', startDrag);
+    card.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+        isDragging = true;
+        const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+        offsetX = clientX;
+        offsetY = clientY;
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', endDrag);
+    }
+
+    function drag(e) {
+        if(!isDragging) return;
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        const dx = clientX - offsetX;
+        const dy = clientY - offsetY;
+
+        card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx/20}deg)`;
+    }
+
+    function endDrag(e) {
+        isDragging = false;
+        const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
+        const dx = clientX - offsetX;
+
+        // If swipe distance is significant, count as like/dislike
+        if(dx > 100) {
+            likeCard();
+        } else if(dx < -100) {
+            dislikeCard();
+        } else {
+            // Reset card
+            card.style.transform = '';
+        }
+
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchmove', drag);
+        document.removeEventListener('touchend', endDrag);
+    }
+
+    // Like button handler
+    function likeCard() {
+        likedCats.push(cats[currentIndex]);
+        removeCard();
+    }
+
+    // Dislike button handler
+    function dislikeCard() {
+        removeCard();
+    }
+
+    function removeCard() {
+        card.style.transform = `translateX(${dx > 0 ? 500 : -500}px) rotate(${dx > 0 ? 30 : -30}deg)`;
+        card.style.opacity = 0;
+        setTimeout(() => {
+            card.remove();
+            currentIndex++;
+            createCard(currentIndex);
+        }, 300);
+    }
+
+    // Desktop buttons
+    document.getElementById('like-btn').onclick = likeCard;
+    document.getElementById('dislike-btn').onclick = dislikeCard;
 }
 
-function likeCat() {
-  likedCats.push(catImages[currentIndex]);
-  nextCat();
-}
-
-function dislikeCat() {
-  nextCat();
-}
-
-function nextCat() {
-  currentIndex++;
-
-  if (currentIndex >= catImages.length) {
-    showSummary();
-  } else {
-    loadCat();
-  }
-}
-
-/* Swipe Events */
-card.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-
-card.addEventListener("touchmove", e => {
-  currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
-  card.style.transform = `translateX(${diff}px) rotate(${diff / 10}deg)`;
-});
-
-card.addEventListener("touchend", () => {
-  const diff = currentX - startX;
-
-  if (diff > 120) {
-    likeCat();
-  } else if (diff < -120) {
-    dislikeCat();
-  } else {
-    card.style.transform = "translateX(0)";
-  }
-});
-
-// Desktop buttons
-likeBtn.addEventListener("click", likeCat);
-dislikeBtn.addEventListener("click", dislikeCat);
-
+// Show summary at the end
 function showSummary() {
-  document.body.innerHTML = `
-    <h1>You liked ${likedCats.length} cats 🐱</h1>
-    <div class="gallery">
-      ${likedCats.map(cat => `<img src="${cat}" />`).join("")}
-    </div>
-    <button onclick="location.reload()">Restart</button>
-  `;
+    cardContainer.style.display = 'none';
+    document.querySelector('.buttons').style.display = 'none';
+    summary.classList.remove('hidden');
+    likedCount.textContent = likedCats.length;
 
-  const style = document.createElement("style");
-  style.innerHTML = `
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 10px;
-      margin: 20px;
-    }
-    .gallery img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-    }
-  `;
-  document.head.appendChild(style);
+    likedCats.forEach(cat => {
+        const img = document.createElement('img');
+        img.src = cat;
+        likedCatsContainer.appendChild(img);
+    });
 }
+
+// Start the app
+createCard(currentIndex);
