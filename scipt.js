@@ -1,7 +1,7 @@
 // Array of cat images (local folder)
 const cats = [
     'cat-images/cat1.jpg',
-    'cat-images/cat2.jpg',
+    'cat-images/cat2.png',
     'cat-images/cat3.jpg',
     'cat-images/cat4.jpg',
     'cat-images/cat5.jpg',
