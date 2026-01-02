@@ -1,19 +1,16 @@
 /**
- * Paws & Preferences - script.js
- * Requirement: Source images from Cataas (https://cataas.com/)
+ * Paws & Preferences - Using Cataas API
  */
 
-// Generate a list of cat images from the Cataas API
-const cats = [
-    'cat-images/cat1.jpg',
-    'cat-images/cat2.png',
-    'cat-images/cat3.jpg',
-    'cat-images/cat4.jpg',
-    'cat-images/cat5.jpg',
-    'cat-images/cat6.jpg',
-    'cat-images/cat7.jpg',
-    'cat-images/catGif.gif'
-];
+// Generate unique cat image URLs from Cataas API
+const TOTAL_CATS = 10;
+const cats = [];
+
+// Generate unique cat URLs with random parameters to ensure different cats
+for (let i = 0; i < TOTAL_CATS; i++) {
+    // Add timestamp and random seed to get different cats
+    cats.push(`https://cataas.com/cat?width=300&height=400&t=${Date.now()}_${i}`);
+}
 
 let currentIndex = 0;
 let likedCats = [];
@@ -22,10 +19,15 @@ const cardContainer = document.getElementById('card-container');
 const summary = document.getElementById('summary');
 const likedCount = document.getElementById('liked-count');
 const likedCatsContainer = document.getElementById('liked-cats');
+const cardCounter = document.getElementById('card-counter');
 
-// Initialize the buttons once
+// Initialize the buttons
 const likeBtn = document.getElementById('like-btn');
 const dislikeBtn = document.getElementById('dislike-btn');
+
+function updateCounter() {
+    cardCounter.textContent = `${currentIndex + 1} / ${TOTAL_CATS}`;
+}
 
 function createCard(index) {
     if (index >= cats.length) {
@@ -33,32 +35,36 @@ function createCard(index) {
         return;
     }
 
-    // Clear previous card (if any)
+    updateCounter();
+
+    // Clear previous card
     cardContainer.innerHTML = ''; 
 
     const card = document.createElement('div');
-    card.classList.add('card');
+    card.classList.add('card', 'loading');
+    card.textContent = "Loading Cat...";
     
-    // Use a high-quality random cat URL from the API
     const imageUrl = cats[index];
     
-    // Create a temporary image object to check if it loads
+    // Preload the image
     const imgLoader = new Image();
     imgLoader.src = imageUrl;
+    
     imgLoader.onload = () => {
         card.style.backgroundImage = `url(${imageUrl})`;
-        // Remove loading state once image is ready
-        card.textContent = ""; 
+        card.textContent = "";
+        card.classList.remove('loading');
     };
+    
     imgLoader.onerror = () => {
         card.style.backgroundColor = "#ffcccc";
         card.textContent = "Failed to load cat 😿";
+        card.classList.remove('loading');
     };
 
-    card.textContent = "Loading Cat..."; // Placeholder text
     cardContainer.appendChild(card);
 
-    // --- Interaction Handlers (Keep the same logic as before) ---
+    // --- Drag/Swipe Interaction ---
     let startX = 0;
     let isDragging = false;
 
@@ -79,7 +85,17 @@ function createCard(index) {
         if (!isDragging) return;
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         const dx = clientX - startX;
-        card.style.transform = `translate(${dx}px, 0) rotate(${dx / 20}deg)`;
+        const rotation = dx / 20;
+        card.style.transform = `translate(${dx}px, 0) rotate(${rotation}deg)`;
+        
+        // Add color hint based on swipe direction
+        if (dx > 50) {
+            card.style.border = '3px solid #ff6b81';
+        } else if (dx < -50) {
+            card.style.border = '3px solid #95a5a6';
+        } else {
+            card.style.border = 'none';
+        }
     }
 
     function endDrag(e) {
@@ -93,11 +109,14 @@ function createCard(index) {
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('touchend', endDrag);
 
-        if (dx > 100) { handleAction(true); } 
-        else if (dx < -100) { handleAction(false); } 
-        else {
+        if (dx > 100) { 
+            handleAction(true); 
+        } else if (dx < -100) { 
+            handleAction(false); 
+        } else {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = '';
+            card.style.border = 'none';
         }
     }
 
@@ -105,31 +124,49 @@ function createCard(index) {
     dislikeBtn.onclick = () => handleAction(false);
 
     function handleAction(isLiked) {
-        if (isLiked) likedCats.push(cats[currentIndex]);
+        if (isLiked) {
+            likedCats.push(cats[currentIndex]);
+        }
+        
         const direction = isLiked ? 1 : -1;
         card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
         card.style.transform = `translateX(${direction * 500}px) rotate(${direction * 40}deg)`;
         card.style.opacity = '0';
+        card.style.border = 'none';
+        
         setTimeout(() => {
             card.remove();
             currentIndex++;
             createCard(currentIndex);
-        }, 300);
+        }, 500);
     }
 }
 
 function showSummary() {
     cardContainer.style.display = 'none';
     document.querySelector('.buttons').style.display = 'none';
+    cardCounter.style.display = 'none';
     summary.classList.remove('hidden');
+    
     likedCount.textContent = likedCats.length;
+    
+    // Handle plural
+    document.getElementById('plural').textContent = likedCats.length === 1 ? '' : 's';
 
-    likedCats.forEach(catUrl => {
-        const img = document.createElement('img');
-        img.src = catUrl;
-        img.alt = "A cat you liked";
-        likedCatsContainer.appendChild(img);
-    });
+    if (likedCats.length === 0) {
+        const noLikes = document.createElement('p');
+        noLikes.textContent = "You didn't like any cats! 😿";
+        noLikes.style.color = '#666';
+        noLikes.style.marginTop = '20px';
+        likedCatsContainer.appendChild(noLikes);
+    } else {
+        likedCats.forEach(catUrl => {
+            const img = document.createElement('img');
+            img.src = catUrl;
+            img.alt = "A cat you liked";
+            likedCatsContainer.appendChild(img);
+        });
+    }
 }
 
 // Start the app

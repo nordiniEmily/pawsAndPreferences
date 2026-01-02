@@ -8,10 +8,15 @@
 </head>
 <body>
     <div class="app">
+        <h1>🐱 Paws & Preferences</h1>
+        
+        <!-- Card counter -->
+        <div class="card-counter" id="card-counter">1 / 10</div>
+
         <!-- Main card container -->
         <div id="card-container"></div>
 
-        <!-- Swipe buttons for desktop users -->
+        <!-- Swipe buttons -->
         <div class="buttons">
             <button id="dislike-btn">❌ Dislike</button>
             <button id="like-btn">❤️ Like</button>
@@ -19,7 +24,7 @@
 
         <!-- Summary container (hidden initially) -->
         <div id="summary" class="hidden">
-            <h2>You liked <span id="liked-count">0</span> cats!</h2>
+            <h2>You liked <span id="liked-count">0</span> cat<span id="plural">s</span>! 🎉</h2>
             <div id="liked-cats"></div>
         </div>
     </div>

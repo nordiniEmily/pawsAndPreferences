@@ -12,10 +12,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background: #f8f3f0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
     padding: 20px;
     position: relative;
+}
+
+/* Title */
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2em;
 }
 
 /* Card container */
@@ -24,6 +32,7 @@
     max-width: 90vw;
     height: 400px;
     position: relative;
+    margin-bottom: 20px;
 }
 
 /* Individual cards */
@@ -34,7 +43,7 @@
     border-radius: 15px;
     background-size: cover;
     background-position: center;
-    background-color: #ddd; /* Gray placeholder while image loads */
+    background-color: #fff;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     cursor: grab;
     user-select: none;
@@ -42,6 +51,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #666;
+    font-size: 16px;
+}
+
+.card:active {
+    cursor: grabbing;
 }
 
 /* Buttons for like/dislike */
@@ -52,16 +67,23 @@
 }
 
 .buttons button {
-    padding: 10px 20px;
-    font-size: 18px;
+    padding: 12px 24px;
+    font-size: 20px;
     border: none;
-    border-radius: 10px;
+    border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .buttons button:hover {
     transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+.buttons button:active {
+    transform: scale(0.95);
 }
 
 #like-btn {
@@ -70,7 +92,7 @@
 }
 
 #dislike-btn {
-    background-color: #aaa;
+    background-color: #95a5a6;
     color: white;
 }
 
@@ -81,20 +103,72 @@
 
 #summary {
     text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    max-width: 600px;
 }
 
-/* Ensure the summary images are neat */
+#summary h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#liked-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 #liked-cats img {
     width: 100px;
     height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid white;
-}
-#liked-cats img {
-    width: 80px;
-    height: 80px;
     border-radius: 10px;
     object-fit: cover;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+#liked-cats img:hover {
+    transform: scale(1.1);
+}
+
+/* Loading indicator */
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ff6b81;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Card counter */
+.card-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
