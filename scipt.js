@@ -5,14 +5,14 @@
 
 // Generate a list of cat images from the Cataas API
 const cats = [
-    'https://cataas.com/cat?1',
-    'https://cataas.com/cat?2',
-    'https://cataas.com/cat?3',
-    'https://cataas.com/cat?4',
-    'https://cataas.com/cat?5',
-    'https://cataas.com/cat?6',
-    'https://cataas.com/cat?7',
-    'https://cataas.com/cat/gif' // One GIF as per your original list
+    'cat-images/cat1.jpg',
+    'cat-images/cat2.png',
+    'cat-images/cat3.jpg',
+    'cat-images/cat4.jpg',
+    'cat-images/cat5.jpg',
+    'cat-images/cat6.jpg',
+    'cat-images/cat7.jpg',
+    'cat-images/catGif.gif'
 ];
 
 let currentIndex = 0;
