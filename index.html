@@ -1,27 +1,29 @@
-<!-- Nordini Emily Binti Mohathir -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Paws & Preferences 🐱</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="app">
+        <!-- Main card container -->
+        <div id="card-container"></div>
 
-  <h1>Paws & Preferences 🐾</h1>
+        <!-- Swipe buttons for desktop users -->
+        <div class="buttons">
+            <button id="dislike-btn">❌ Dislike</button>
+            <button id="like-btn">❤️ Like</button>
+        </div>
 
-  <div id="app">
-    <div id="card" class="card">
-      <img id="catImage" src="" alt="Cat Image" />
+        <!-- Summary container (hidden initially) -->
+        <div id="summary" class="hidden">
+            <h2>You liked <span id="liked-count">0</span> cats!</h2>
+            <div id="liked-cats"></div>
+        </div>
     </div>
 
-    <div class="buttons">
-      <button id="dislikeBtn">❌ Dislike</button>
-      <button id="likeBtn">❤️ Like</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
