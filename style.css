@@ -34,10 +34,14 @@
     border-radius: 15px;
     background-size: cover;
     background-position: center;
+    background-color: #ddd; /* Gray placeholder while image loads */
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     cursor: grab;
     user-select: none;
     transition: transform 0.3s ease, opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Buttons for like/dislike */
@@ -79,14 +83,14 @@
     text-align: center;
 }
 
-#liked-cats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 10px;
+/* Ensure the summary images are neat */
+#liked-cats img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid white;
 }
-
 #liked-cats img {
     width: 80px;
     height: 80px;

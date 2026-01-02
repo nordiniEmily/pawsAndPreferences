@@ -1,124 +1,136 @@
-// Array of cat images (local folder)
+/**
+ * Paws & Preferences - script.js
+ * Requirement: Source images from Cataas (https://cataas.com/)
+ */
+
+// Generate a list of cat images from the Cataas API
 const cats = [
-    'cat-images/cat1.jpg',
-    'cat-images/cat2.png',
-    'cat-images/cat3.jpg',
-    'cat-images/cat4.jpg',
-    'cat-images/cat5.jpg',
-    'cat-images/cat6.jpg',
-    'cat-images/cat7.jpg',
-    'cat-images/catGif.gif'
+    'https://cataas.com/cat?1',
+    'https://cataas.com/cat?2',
+    'https://cataas.com/cat?3',
+    'https://cataas.com/cat?4',
+    'https://cataas.com/cat?5',
+    'https://cataas.com/cat?6',
+    'https://cataas.com/cat?7',
+    'https://cataas.com/cat/gif' // One GIF as per your original list
 ];
 
-let currentIndex = 0;          // Track current cat index
-let likedCats = [];            // Store liked cats
+let currentIndex = 0;
+let likedCats = [];
 
 const cardContainer = document.getElementById('card-container');
 const summary = document.getElementById('summary');
 const likedCount = document.getElementById('liked-count');
 const likedCatsContainer = document.getElementById('liked-cats');
 
-// Initialize the first card
+// Initialize the buttons once
+const likeBtn = document.getElementById('like-btn');
+const dislikeBtn = document.getElementById('dislike-btn');
+
 function createCard(index) {
-    if(index >= cats.length) {
+    // If no more cats, show summary
+    if (index >= cats.length) {
         showSummary();
         return;
     }
 
+    // Create the card element
     const card = document.createElement('div');
     card.classList.add('card');
     card.style.backgroundImage = `url(${cats[index]})`;
     cardContainer.appendChild(card);
 
-    // Drag/swipe variables
-    let offsetX = 0;
-    let offsetY = 0;
+    let startX = 0;
     let isDragging = false;
 
-    // Mouse/touch events for swipe
+    // --- Interaction Handlers ---
+
+    // 1. Swipe Logic
     card.addEventListener('mousedown', startDrag);
-    card.addEventListener('touchstart', startDrag);
+    card.addEventListener('touchstart', startDrag, { passive: true });
 
     function startDrag(e) {
         isDragging = true;
-        const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-        const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
-        offsetX = clientX;
-        offsetY = clientY;
-
+        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        
+        card.style.transition = 'none'; // Disable transitions while dragging
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('touchend', endDrag);
     }
 
     function drag(e) {
-        if(!isDragging) return;
+        if (!isDragging) return;
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-        const dx = clientX - offsetX;
-        const dy = clientY - offsetY;
-
-        card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx/20}deg)`;
+        const dx = clientX - startX;
+        
+        // Tilt and move the card
+        card.style.transform = `translate(${dx}px, 0) rotate(${dx / 20}deg)`;
     }
 
     function endDrag(e) {
+        if (!isDragging) return;
         isDragging = false;
+        
         const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
-        const dx = clientX - offsetX;
-
-        // If swipe distance is significant, count as like/dislike
-        if(dx > 100) {
-            likeCard();
-        } else if(dx < -100) {
-            dislikeCard();
-        } else {
-            // Reset card
-            card.style.transform = '';
-        }
+        const dx = clientX - startX;
 
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('mouseup', endDrag);
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('touchend', endDrag);
+
+        // Threshold of 100px for swipe
+        if (dx > 100) {
+            handleAction(true); // Like
+        } else if (dx < -100) {
+            handleAction(false); // Dislike
+        } else {
+            // Snap back to center
+            card.style.transition = 'transform 0.3s ease';
+            card.style.transform = '';
+        }
     }
 
-    // Like button handler
-    function likeCard() {
-        likedCats.push(cats[currentIndex]);
-        removeCard();
-    }
+    // 2. Button Logic
+    likeBtn.onclick = () => handleAction(true);
+    dislikeBtn.onclick = () => handleAction(false);
 
-    // Dislike button handler
-    function dislikeCard() {
-        removeCard();
-    }
+    /**
+     * Internal function to handle the result (Like/Dislike)
+     * @param {boolean} isLiked 
+     */
+    function handleAction(isLiked) {
+        if (isLiked) {
+            likedCats.push(cats[currentIndex]);
+        }
+        
+        // Remove card with animation
+        const direction = isLiked ? 1 : -1;
+        card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+        card.style.transform = `translateX(${direction * 500}px) rotate(${direction * 40}deg)`;
+        card.style.opacity = '0';
 
-    function removeCard() {
-        card.style.transform = `translateX(${dx > 0 ? 500 : -500}px) rotate(${dx > 0 ? 30 : -30}deg)`;
-        card.style.opacity = 0;
+        // Wait for animation to finish then load next
         setTimeout(() => {
             card.remove();
             currentIndex++;
             createCard(currentIndex);
         }, 300);
     }
-
-    // Desktop buttons
-    document.getElementById('like-btn').onclick = likeCard;
-    document.getElementById('dislike-btn').onclick = dislikeCard;
 }
 
-// Show summary at the end
 function showSummary() {
     cardContainer.style.display = 'none';
     document.querySelector('.buttons').style.display = 'none';
     summary.classList.remove('hidden');
     likedCount.textContent = likedCats.length;
 
-    likedCats.forEach(cat => {
+    likedCats.forEach(catUrl => {
         const img = document.createElement('img');
-        img.src = cat;
+        img.src = catUrl;
+        img.alt = "A cat you liked";
         likedCatsContainer.appendChild(img);
     });
 }
