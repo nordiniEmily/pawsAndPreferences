@@ -28,32 +28,47 @@ const likeBtn = document.getElementById('like-btn');
 const dislikeBtn = document.getElementById('dislike-btn');
 
 function createCard(index) {
-    // If no more cats, show summary
     if (index >= cats.length) {
         showSummary();
         return;
     }
 
-    // Create the card element
+    // Clear previous card (if any)
+    cardContainer.innerHTML = ''; 
+
     const card = document.createElement('div');
     card.classList.add('card');
-    card.style.backgroundImage = `url(${cats[index]})`;
+    
+    // Use a high-quality random cat URL from the API
+    const imageUrl = cats[index];
+    
+    // Create a temporary image object to check if it loads
+    const imgLoader = new Image();
+    imgLoader.src = imageUrl;
+    imgLoader.onload = () => {
+        card.style.backgroundImage = `url(${imageUrl})`;
+        // Remove loading state once image is ready
+        card.textContent = ""; 
+    };
+    imgLoader.onerror = () => {
+        card.style.backgroundColor = "#ffcccc";
+        card.textContent = "Failed to load cat 😿";
+    };
+
+    card.textContent = "Loading Cat..."; // Placeholder text
     cardContainer.appendChild(card);
 
+    // --- Interaction Handlers (Keep the same logic as before) ---
     let startX = 0;
     let isDragging = false;
 
-    // --- Interaction Handlers ---
-
-    // 1. Swipe Logic
     card.addEventListener('mousedown', startDrag);
     card.addEventListener('touchstart', startDrag, { passive: true });
 
     function startDrag(e) {
         isDragging = true;
         startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-        
-        card.style.transition = 'none'; // Disable transitions while dragging
+        card.style.transition = 'none';
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchmove', drag, { passive: false });
@@ -64,15 +79,12 @@ function createCard(index) {
         if (!isDragging) return;
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         const dx = clientX - startX;
-        
-        // Tilt and move the card
         card.style.transform = `translate(${dx}px, 0) rotate(${dx / 20}deg)`;
     }
 
     function endDrag(e) {
         if (!isDragging) return;
         isDragging = false;
-        
         const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
         const dx = clientX - startX;
 
@@ -81,38 +93,23 @@ function createCard(index) {
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('touchend', endDrag);
 
-        // Threshold of 100px for swipe
-        if (dx > 100) {
-            handleAction(true); // Like
-        } else if (dx < -100) {
-            handleAction(false); // Dislike
-        } else {
-            // Snap back to center
+        if (dx > 100) { handleAction(true); } 
+        else if (dx < -100) { handleAction(false); } 
+        else {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = '';
         }
     }
 
-    // 2. Button Logic
     likeBtn.onclick = () => handleAction(true);
     dislikeBtn.onclick = () => handleAction(false);
 
-    /**
-     * Internal function to handle the result (Like/Dislike)
-     * @param {boolean} isLiked 
-     */
     function handleAction(isLiked) {
-        if (isLiked) {
-            likedCats.push(cats[currentIndex]);
-        }
-        
-        // Remove card with animation
+        if (isLiked) likedCats.push(cats[currentIndex]);
         const direction = isLiked ? 1 : -1;
         card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
         card.style.transform = `translateX(${direction * 500}px) rotate(${direction * 40}deg)`;
         card.style.opacity = '0';
-
-        // Wait for animation to finish then load next
         setTimeout(() => {
             card.remove();
             currentIndex++;
