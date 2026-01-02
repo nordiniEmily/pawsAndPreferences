@@ -1,6 +1,6 @@
 # 🐾 Paws & Preferences: Find Your Favourite Kitty
 
-A mobile-first web application that allows users to discover their favourite cats using swipe gestures.
+A web application that allows users to discover their favourite cats using swipe gestures.
 
 ## Features
 - Swipe right to like, swipe left to dislike
